@@ -10,10 +10,6 @@ async function getAllTabs() {
     return browser.tabs.query({});
 }
 
-async function closeCurrTab() {
-    browser.tabs.remove(getCurrentTab().id);
-}
-
 function injectJS(tab, file) {
     browser.scripting.executeScript({
         target: { tabId: tab.id },
@@ -26,16 +22,26 @@ async function injectCurrJS(file) {
 }
 
 async function switchToPrevTab() {
-    let curr_tab = await getCurrentTab();
-    let all_tabs = await getAllTabs();
-    let last_id
-    for (let i = 1; i < all_tabs.length; i += 1) {
-        if (all_tabs[i].id == curr_tab.id) {
-            browser.tabs.update(last_id, { active: true });
-            return;
-        }
-        last_id = all_tabs[i].id;
-    }
+    getCurrentTab().then((curr_tab) => {
+        getAllTabs().then((all_tabs) => {
+            let last_id
+            for (let i = 1; i < all_tabs.length; i += 1) {
+                if (all_tabs[i].id == curr_tab.id) {
+                    browser.tabs.update(last_id, { active: true });
+                    return;
+                }
+                last_id = all_tabs[i].id;
+            }
+        });
+    });
+}
+
+function workOnTabs() {
+    getAllTabs().then((tabs) => {
+        tabs.forEach((tab) => {
+            injectJS(tab, "openImage.js");
+        });
+    });
 }
 
 async function downloadAll() {
@@ -151,24 +157,12 @@ browser.runtime.onMessage.addListener((m) => {
                     switchToPrevTab();
                 break;
 
-            case 'a':
-                injectCurrJS("openArtist.js");
-                break;
-
-            case 'i':
-                openImages();
+            case 'o':
+                workOnTabs();
                 break;
 
             case 'd':
                 downloadAll();
-                break;
-
-            case 'p':
-                prepare();
-                break;
-
-            case 'c':
-                browser.storage.sync.clear();
                 break;
         }
     }
@@ -179,6 +173,12 @@ browser.commands.onCommand.addListener((command) => {
     switch (command) {
         case "master-shortcut":
             injectCurrJS("selectAction.js");
+            break;
+
+        case "close-tab":
+            getCurrentTab().then((tab) => {
+                browser.tabs.remove(tab.id);
+            });
             break;
     }
 });

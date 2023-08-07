@@ -118,11 +118,32 @@ async function openImages() {
 
 
 async function search(string) {
-    injectCurrJS("addToSearch.js");
-    browser.runtime.onMessage.addListener((m) => {
-        browser.runtime.sendMessage({
-            string: string,
-        });
+    let tab = await getCurrentTab()
+    browser.scripting.executeScript({
+        target: { tabId: tab.id },
+        args: [string],
+        func: (string) => {
+            let url = window.location.href;
+
+            if (string.includes('u') &&
+                !url.includes('+-censored')) {
+                url += '+-censored';
+            }
+
+            if (string.includes('s') &&
+                !url.includes('%3Ascore')) {
+                if (url.includes("gelbooru.com") ||
+                    url.includes("rule34.xxx")) {
+                    url += '+sort%3Ascore';
+                }
+                if (url.includes("yande.re") ||
+                    url.includes("lolibooru.moe")) {
+                    url += '+order%3Ascore';
+                }
+            }
+
+            window.open(url, "_self");
+        }
     });
 }
 

@@ -43,7 +43,7 @@ function main() {
 
 
         if (!openImage) {
-            for (let i = 0; i < artists.length; i += 1) {
+            for (let i = 0; i < artists.length; i++) {
                 let target = "_blank";
                 if (i == artists.length - 1)
                     target = "_self";

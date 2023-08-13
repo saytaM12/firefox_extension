@@ -43,12 +43,10 @@ function main() {
 
 
         if (!openImage) {
-            for (let i = 0; i < artists.length; i++) {
-                let target = "_blank";
-                if (i == artists.length - 1)
-                    target = "_self";
-                window.open(artists[i].getAttribute("href"), target);
+            for (let i = 0; i < artists.length - 1; i++) {
+                window.open(artists[i].getAttribute("href"), "_blank");
             }
+            window.open(artists[artists.length - 1].getAttribute("href"), "_self");
             return;
         }
     }

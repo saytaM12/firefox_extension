@@ -1,3 +1,13 @@
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function openLink(link) {
+    setTimeout(() => {
+        window.open(link, "_blank");
+    }, getRandomInt(1000));
+}
+
 function main() {
     let url = window.location.href;
     if (!((url.includes("gelbooru.com") && !url.includes("s=view")) ||
@@ -17,9 +27,9 @@ function main() {
                 });
 
         for (let i = 0; i < imageLinks.length - 1; i++) {
-            window.open(imageLinks[i].getAttribute("href"), "_blank");
+            window.open(imageLinks[i], "_blank");
         }
-        window.open(imageLinks[-1].getAttribute("href"), "_self");
+        window.open(imageLinks[imageLinks.length - 1], "_self");
     }
 
     if (url.includes("rule34.xxx")) {
@@ -31,9 +41,9 @@ function main() {
                 });
 
         for (let i = 0; i < imageLinks.length - 1; i++) {
-            window.open(imageLinks[i].getAttribute("href"), "_blank");
+            window.open(imageLinks[i], "_blank");
         }
-        window.open(imageLinks[-1].getAttrribute("href"), "_self");
+        window.open(imageLinks[imageLinks.length - 1], "_self");
     }
 
     if (url.includes("lolibooru.moe") || url.includes("yande.re")) {
@@ -44,9 +54,9 @@ function main() {
                 });
 
         for (let i = 0; i < imageLinks.length - 1; i++) {
-            window.open(imageLinks[i].getAttribute("href"), "_blank");
+            window.open(imageLinks[i], "_blank");
         }
-        window.open(imageLinks[-1].getAttribute("href"), "_self");
+        window.open(imageLinks[imageLinks.length - 1], "_self");
     }
 }
 

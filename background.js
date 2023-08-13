@@ -185,6 +185,10 @@ browser.runtime.onMessage.addListener((m) => {
             case 'd':
                 downloadAll();
                 break;
+
+            case 'l':
+                injectCurrJS("openAll.js");
+                break;
         }
     }
 });

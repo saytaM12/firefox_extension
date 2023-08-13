@@ -15,7 +15,8 @@ s - (first) add to search bar\n\
     s - 'sort:score'\n\
 d - download open images\n\
 s - (not first) switch to previous tab\n\
-o - open correct things in correct tabs\n", def);
+o - open correct things in correct tabs\n\
+l - open and prepare all images on this tab\n", def);
     browser.runtime.sendMessage(text);
 }
 

@@ -1,11 +1,11 @@
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
-
-function openLink(link) {
-    setTimeout(() => {
-        window.open(link, "_blank");
-    }, getRandomInt(1000));
+function openSlowly(imageLinks) {
+    var i = 0;
+    var interval = window.setInterval((imageLinks) => {
+        window.open(imageLinks[imageLinks.length - 1 - i], "_blank")
+        if (++i == imageLinks.length) {
+            window.clearInterval(interval);
+        }
+    }, 300, imageLinks)
 }
 
 function main() {
@@ -17,47 +17,32 @@ function main() {
         return 0;
     }
 
+    let imageLinks = []
 
     if (url.includes("gelbooru.com")) {
-        let imageLinks = []
         document.querySelector(".thumbnail-container")
                 .querySelectorAll("a")
                 .forEach((image) => {
                     imageLinks.push(image.getAttribute("href"));
                 });
-
-        for (let i = 0; i < imageLinks.length - 1; i++) {
-            window.open(imageLinks[i], "_blank");
-        }
-        window.open(imageLinks[imageLinks.length - 1], "_self");
     }
 
     if (url.includes("rule34.xxx")) {
-        let imageLinks = []
         document.querySelector(".image-list")
                 .querySelectorAll("a")
                 .forEach((image) => {
                     imageLinks.push(image.getAttribute("href"));
                 });
-
-        for (let i = 0; i < imageLinks.length - 1; i++) {
-            window.open(imageLinks[i], "_blank");
-        }
-        window.open(imageLinks[imageLinks.length - 1], "_self");
     }
 
     if (url.includes("lolibooru.moe") || url.includes("yande.re")) {
-        let imageLinks = []
         document.querySelectorAll(".directlink")
                 .forEach((image) => {
                     imageLinks.push(image.getAttribute("href"));
                 });
-
-        for (let i = 0; i < imageLinks.length - 1; i++) {
-            window.open(imageLinks[i], "_blank");
-        }
-        window.open(imageLinks[imageLinks.length - 1], "_self");
     }
+
+    openSlowly(imageLinks);
 }
 
 main();

@@ -1,6 +1,6 @@
 {
-    "name": "Hentai Image Download",
-    "description": "Git Gut",
+    "name": "Image Downloader",
+    "description": "download multiple images (from specific sites only) at the same time",
     "version": "1",
     "manifest_version": 3,
     "browser_specific_settings": {
@@ -16,16 +16,14 @@
         "128": "imgs/gelbooru_bot128.png"
     },
     "action": {
-        "default_title": "GID GUD",
+        "default_title": "Image Downloader",
         "default_popup": "popup/popup.html"
     },
     "permissions": [
         "activeTab",
         "tabs",
         "downloads",
-        "scripting",
-        "storage",
-        "unlimitedStorage"
+        "scripting"
     ],
     "host_permissions": [
         "<all_urls>"

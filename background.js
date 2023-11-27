@@ -87,36 +87,6 @@ async function downloadAll() {
     });
 }
 
-async function openImages() {
-    let bytes = await browser.storage.sync.getBytesInUse();
-    if (bytes == 0) {
-        getCurrentTab().then((tab) => {
-            injectJS(tab, "openImage.js");
-        });
-
-        switchToPrevTab();
-        return;
-    }
-
-    let storage = await browser.storage.sync.get("local");
-    let tabs = await getAllTabs();
-    let new_tabs = [];
-
-    tabs.forEach((tab) => {
-        if (!storage.local.includes(tab.id)) {
-            new_tabs.push(tab);
-        }
-    });
-
-    browser.tabs.update(new_tabs[0].id, { active: true });
-
-    new_tabs.forEach((tab) => {
-        injectJS(tab, "openImage.js");
-    });
-    browser.storage.sync.clear();
-}
-
-
 async function search(string) {
     let tab = await getCurrentTab()
     browser.scripting.executeScript({
@@ -147,29 +117,12 @@ async function search(string) {
     });
 }
 
-function prepare() {
-    browser.storage.sync.getBytesInUse().then((bytes) => {
-        if (bytes != 0)
-            return;
-    });
-
-    let first_tabs_ids = [];
-
-    getAllTabs().then((f_tabs) => {
-        f_tabs.forEach((tab) => {
-            first_tabs_ids.push(tab.id);
-        });
-
-        browser.storage.sync.set({ local: first_tabs_ids });
-    });
-}
-
 browser.runtime.onMessage.addListener((m) => {
-    let done = ''
+    let processed = ''
     for (let i = 0; i < m.length; i += 1) {
-        if (done.includes(m[i]))
+        if (processed.includes(m[i]))
             continue;
-        done += m[i];
+        processed += m[i];
         switch (m[i]) {
             case 's':
                 if (i == 0)
@@ -188,6 +141,7 @@ browser.runtime.onMessage.addListener((m) => {
 
             case 'l':
                 injectCurrJS("openAll.js");
+                workOnTabs();
                 break;
         }
     }

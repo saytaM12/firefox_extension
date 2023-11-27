@@ -5,7 +5,7 @@ function openSlowly(imageLinks) {
         if (++i == imageLinks.length) {
             window.clearInterval(interval);
         }
-    }, 300, imageLinks)
+    }, 100, imageLinks)
 }
 
 function main() {

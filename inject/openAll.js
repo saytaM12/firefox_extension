@@ -2,10 +2,12 @@ function openSlowly(imageLinks) {
     var i = 0;
     var interval = window.setInterval((imageLinks) => {
         window.open(imageLinks[imageLinks.length - 1 - i], "_blank")
-        if (++i == imageLinks.length) {
+        window.focus();
+        if (++i >= imageLinks.length) {
             window.clearInterval(interval);
+            setTimeout(() => {browser.runtime.sendMessage('o')}, 1000);
         }
-    }, 100, imageLinks)
+    }, 200, imageLinks);
 }
 
 function main() {

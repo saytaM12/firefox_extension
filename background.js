@@ -141,7 +141,6 @@ browser.runtime.onMessage.addListener((m) => {
 
             case 'l':
                 injectCurrJS("openAll.js");
-                workOnTabs();
                 break;
         }
     }

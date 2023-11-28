@@ -5,9 +5,9 @@ function openSlowly(imageLinks) {
         window.focus();
         if (++i >= imageLinks.length) {
             window.clearInterval(interval);
-            setTimeout(() => {browser.runtime.sendMessage('o')}, 1000);
+            setTimeout(() => {browser.runtime.sendMessage('o')}, 2000);
         }
-    }, 200, imageLinks);
+    }, 250, imageLinks);
 }
 
 function main() {

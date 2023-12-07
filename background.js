@@ -117,6 +117,41 @@ async function search(string) {
     });
 }
 
+function tabError(tab) {
+    if (tab.url.includes("gelbooru")) {
+    }
+    else if (tab.url.includes("rule34")) {
+    }
+    else if (tab.url.includes("lolibooru")) {
+    }
+    else if (tab.url.includes("yande.re")) {
+        if (tab.title == "301 Moved Permanently") {
+            return true;
+        }
+    }
+    return false;
+}
+
+async function reloadErrors() {
+    let tabs = await getAllTabs();
+    let done = false;
+
+    let interval = setInterval(() => {
+        for (let i = 0; i < tabs.length; i++) {
+            if (tabError(tabs[i])) {
+                done = false;
+                if (tabs[i].status == "complete") {
+                    browser.tabs.reload(tabs[i].id);
+                }
+            }
+            if (done) {
+                clearInterval(interval);
+            }
+            done = true;
+        }
+    }, 2000);
+}
+
 browser.runtime.onMessage.addListener((m) => {
     let processed = ''
     for (let i = 0; i < m.length; i += 1) {
@@ -141,6 +176,10 @@ browser.runtime.onMessage.addListener((m) => {
 
             case 'l':
                 injectCurrJS("openAll.js");
+                break;
+
+            case 'y':
+                reloadErrors();
                 break;
         }
     }

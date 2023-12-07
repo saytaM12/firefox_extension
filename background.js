@@ -134,20 +134,26 @@ function tabError(tab) {
 
 async function reloadErrors() {
     let tabs = await getAllTabs();
-    let done = false;
+    let errorTabs = [];
+
+    for (let i = 0; i < tabs.length; i++) {
+        if (tabError(tabs[i])) {
+            errorTabs.push(tabs[i]);
+        }
+    }
 
     let interval = setInterval(() => {
-        for (let i = 0; i < tabs.length; i++) {
-            if (tabError(tabs[i])) {
-                done = false;
-                if (tabs[i].status == "complete") {
-                    browser.tabs.reload(tabs[i].id);
-                }
+        if (errorTabs.length == 0) {
+            clearInterval(interval);
+        }
+        for (let i = 0; i < errorTabs.length; i++) {
+            if (!tabError(errorTabs[i])) {
+                errorTabs.splice(i, 1);
+                continue;
             }
-            if (done) {
-                clearInterval(interval);
+            if (errorTabs[i].status == "complete") {
+                browser.tabs.reload(errorTabs[i].id);
             }
-            done = true;
         }
     }, 2000);
 }

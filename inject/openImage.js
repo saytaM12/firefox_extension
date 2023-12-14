@@ -13,7 +13,7 @@ function main() {
 
     let artistLi = document.querySelectorAll(".tag-type-artist");
 
-    if (artistLi.length == 0 || url.includes("yande.re")) {
+    if (artistLi.length == 0) {
         openImage = true;
     }
     else {
@@ -26,16 +26,14 @@ function main() {
 
         if (url.includes("gelbooru.com")) {
             artists.forEach((artist) => {
-                let text = artist.innerText.replaceAll(' ', '_')
+                let text = artist.innerText.replaceAll(' ', '_');
                 if (document.getElementById("tags-search").value.includes(text))
                     openImage = true;
             });
         }
-        else if (url.includes("rule34.xxx") ||
-            url.includes("lolibooru.moe") ||
-            url.includes("yande.re")) {
+        else if (url.includes("rule34.xxx") || url.includes("lolibooru.moe") || url.includes("yande.re")) {
             artists.forEach((artist) => {
-                let text = artist.innerText.replaceAll(' ', '_')
+                let text = artist.innerText.replaceAll(' ', '_');
                 if (document.getElementById("tags").value.includes(text))
                     openImage = true;
             });

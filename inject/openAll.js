@@ -7,7 +7,7 @@ function openSlowly(imageLinks) {
             window.clearInterval(interval);
             setTimeout(() => {browser.runtime.sendMessage('o')}, 2000);
         }
-    }, 250, imageLinks);
+    }, 100, imageLinks);
 }
 
 function main() {
@@ -23,7 +23,7 @@ function main() {
 
     if (url.includes("gelbooru.com")) {
         document.querySelector(".thumbnail-container")
-                .querySelectorAll("a")
+                .querySelectorAll('a')
                 .forEach((image) => {
                     imageLinks.push(image.getAttribute("href"));
                 });
@@ -31,7 +31,7 @@ function main() {
 
     if (url.includes("rule34.xxx")) {
         document.querySelector(".image-list")
-                .querySelectorAll("a")
+                .querySelectorAll('a')
                 .forEach((image) => {
                     imageLinks.push(image.getAttribute("href"));
                 });

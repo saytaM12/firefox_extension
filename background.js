@@ -3,11 +3,14 @@ async function getCurrentTab() {
         active: true,
         lastFocusedWindow: true
     });
+
     return tab;
+    //}).then((tabs) => {return tabs[0]});
 }
 
 async function getAllTabs() {
-    return browser.tabs.query({});
+    let tabs = await browser.tabs.query({});
+    return tabs.filter((tab) => (tab.url.includes("gelbooru") || tab.url.includes("rule34") || tab.url.includes("lolibooru") || tab.url.includes("yande.re")));
 }
 
 function injectJS(tab, file) {
@@ -21,22 +24,7 @@ async function injectCurrJS(file) {
     injectJS(await getCurrentTab(), file);
 }
 
-async function switchToPrevTab() {
-    getCurrentTab().then((curr_tab) => {
-        getAllTabs().then((all_tabs) => {
-            let last_id
-            for (let i = 1; i < all_tabs.length; i += 1) {
-                if (all_tabs[i].id == curr_tab.id) {
-                    browser.tabs.update(last_id, { active: true });
-                    return;
-                }
-                last_id = all_tabs[i].id;
-            }
-        });
-    });
-}
-
-function workOnTabs() {
+async function workOnTabs() {
     getAllTabs().then((tabs) => {
         tabs.forEach((tab) => {
             injectJS(tab, "openImage.js");
@@ -45,75 +33,79 @@ function workOnTabs() {
 }
 
 async function downloadAll() {
-    let tabs = await getAllTabs();
-    let file;
-    let url;
-    let download = false;
+    getAllTabs().then((tabs) => {
+        let file;
+        let url;
+        let download = false;
 
-    tabs.forEach((tab) => {
-        url = tab.url;
-        if (tab.url.includes("https://img3.gelbooru.com/images/")) {
-            download = true;
-            file = "culture/" + url.substring(url.lastIndexOf('/') + 1);
-        }
-        else if (tab.url.includes("https://wimg.rule34.xxx//images/")) {
-            download = true;
-            file = "culture/" + url.substring(url.lastIndexOf('/') + 1, url.indexOf('?'));
-        }
-        else if (tab.url.includes("https://lolibooru.moe/image/")) {
-            download = true;
-            file = url.substring(28);
-            file = file.substring(0, file.indexOf('/'));
-            file += url.substring(url.lastIndexOf('.'));
-            file = "culture/" + file;
-        }
-        else if (tab.url.includes("https://files.yande.re/")) {
-            download = true;
-            file = url.substring(23);
-            file = file.substring(file.indexOf('/') + 1);
-            file = file.substring(0, file.indexOf('/'));
-            file += url.substring(url.lastIndexOf('.'));
-            file = "culture/" + file;
-        }
-        if (download) {
-            browser.downloads.download({
-                url: url,
-                filename: file
-            });
-            browser.tabs.remove(tab.id);
-        }
-        download = false;
-        return;
+        tabs.forEach((tab) => {
+            url = tab.url;
+            if (tab.url.includes("https://img3.gelbooru.com/images/")) {
+                download = true;
+                file = "culture/" + url.substring(url.lastIndexOf('/') + 1);
+            }
+            else if (tab.url.includes("https://wimg.rule34.xxx//images/")) {
+                download = true;
+                file = "culture/" + url.substring(url.lastIndexOf('/') + 1, url.indexOf('?'));
+            }
+            else if (tab.url.includes("https://lolibooru.moe/image/")) {
+                download = true;
+                file = url.substring(28);
+                file = file.substring(0, file.indexOf('/'));
+                file += url.substring(url.lastIndexOf('.'));
+                file = "culture/" + file;
+            }
+            else if (tab.url.includes("https://files.yande.re/")) {
+                download = true;
+                file = url.substring(23);
+                file = file.substring(file.indexOf('/') + 1);
+                file = file.substring(0, file.indexOf('/'));
+                file += url.substring(url.lastIndexOf('.'));
+                file = "culture/" + file;
+            }
+            if (download) {
+                browser.downloads.download({
+                    url: url,
+                    filename: file
+                });
+                browser.tabs.remove(tab.id);
+            }
+            download = false;
+            return;
+        });
     });
 }
 
-async function search(string) {
-    let tab = await getCurrentTab()
-    browser.scripting.executeScript({
-        target: { tabId: tab.id },
-        args: [string],
-        func: (string) => {
-            let url = window.location.href;
+function search(string) {
+    getCurrentTab().then((tab) => {
+        browser.scripting.executeScript({
+            target: { tabId: tab.id },
+            args: [string],
+            func: (string) => {
+                let modifiers = new Set([""]);
+                modifiers.clear();
 
-            if (string.includes('u') &&
-                !url.includes('+-censored')) {
-                url += '+-censored';
-            }
 
-            if (string.includes('s') &&
-                !url.includes('%3Ascore')) {
-                if (url.includes("gelbooru.com") ||
-                    url.includes("rule34.xxx")) {
-                    url += '+sort%3Ascore';
+                let url = window.location.href;
+
+                if (string.includes('u')) {
+                    modifiers.add("-censored");
                 }
-                if (url.includes("yande.re") ||
-                    url.includes("lolibooru.moe")) {
-                    url += '+order%3Ascore';
-                }
-            }
 
-            window.open(url, "_self");
-        }
+                if (string.includes('s')) {
+                    if (url.includes("gelbooru.com") || url.includes("rule34.xxx")) {
+                        modifiers.add("sort:score");
+                    }
+                    if (url.includes("yande.re") || url.includes("lolibooru.moe")) {
+                        modifiers.add("order:Ascore");
+                    }
+                }
+
+                let textBox = document.getElementById("tags-search");
+                modifiers.forEach((modifier) => {textBox.value = textBox.value + ' ' + modifier});
+                textBox.nextElementSibling.click()
+            }
+        });
     });
 }
 
@@ -132,30 +124,41 @@ function tabError(tab) {
     return false;
 }
 
-async function reloadErrors() {
-    let tabs = await getAllTabs();
-    let errorTabs = [];
-
-    for (let i = 0; i < tabs.length; i++) {
-        if (tabError(tabs[i])) {
-            errorTabs.push(tabs[i]);
-        }
-    }
-
+function reloadErrors() {
     let interval = setInterval(() => {
-        if (errorTabs.length == 0) {
-            clearInterval(interval);
-        }
-        for (let i = 0; i < errorTabs.length; i++) {
-            if (!tabError(errorTabs[i])) {
-                errorTabs.splice(i, 1);
-                continue;
+        getAllTabs().then((tabs) => {
+            let errorTabs = [];
+
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabError(tabs[i])) {
+                    errorTabs.push(tabs[i]);
+                }
             }
-            if (errorTabs[i].status == "complete") {
-                browser.tabs.reload(errorTabs[i].id);
+            if (errorTabs.length == 0) {
+                clearInterval(interval);
+                return;
             }
-        }
+            for (let i = 0; i < errorTabs.length; i++) {
+                if (errorTabs[i].status == "complete") {
+                    browser.tabs.reload(errorTabs[i].id);
+                }
+            }
+        });
     }, 2000);
+}
+
+function removeDuplicates() {
+    getAllTabs().then((allTabs) => {
+        let tabCount = {};
+
+        allTabs.forEach((tab) => {
+            if (!tabCount[tab.url]) {
+                tabCount[tab.url] = 1;
+            } else {
+                browser.tabs.remove(tab.id);
+            }
+        });
+    });
 }
 
 browser.runtime.onMessage.addListener((m) => {
@@ -166,10 +169,7 @@ browser.runtime.onMessage.addListener((m) => {
         processed += m[i];
         switch (m[i]) {
             case 's':
-                if (i == 0)
-                    search(m.substring(1));
-                else
-                    switchToPrevTab();
+                search(m.substring(i + 1));
                 break;
 
             case 'o':
@@ -186,6 +186,10 @@ browser.runtime.onMessage.addListener((m) => {
 
             case 'y':
                 reloadErrors();
+                break;
+
+            case 'u':
+                removeDuplicates();
                 break;
         }
     }

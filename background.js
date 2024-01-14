@@ -161,6 +161,9 @@ function removeDuplicates() {
     });
 }
 
+function openArtistOnAllBoards() {
+}
+
 browser.runtime.onMessage.addListener((m) => {
     let processed = ''
     for (let i = 0; i < m.length; i += 1) {
@@ -190,6 +193,10 @@ browser.runtime.onMessage.addListener((m) => {
 
             case 'u':
                 removeDuplicates();
+                break;
+
+            case 'c':
+                openArtistOnAllBoards();
                 break;
         }
     }

@@ -42,7 +42,8 @@ d - download open images\n\
 o - open correct things in correct tabs\n\
 l - open and prepare all images on this tab\n\
 y - reload all errors\n\
-u - remove duplicate tabs\n", def);
+u - remove duplicate tabs\n\
+c - open artist on all boards\n", def);
     browser.runtime.sendMessage(text);
 }
 

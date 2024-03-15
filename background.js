@@ -102,7 +102,7 @@ function search(string) {
                 }
 
                 let textBox = document.getElementById("tags-search");
-                modifiers.forEach((modifier) => {textBox.value = textBox.value + ' ' + modifier});
+                modifiers.forEach((modifier) => { textBox.value = textBox.value + ' ' + modifier });
                 textBox.nextElementSibling.click()
             }
         });
@@ -164,41 +164,80 @@ function removeDuplicates() {
 function openArtistOnAllBoards() {
 }
 
-browser.runtime.onMessage.addListener((m) => {
-    let processed = ''
-    for (let i = 0; i < m.length; i += 1) {
-        if (processed.includes(m[i]))
-            continue;
-        processed += m[i];
-        switch (m[i]) {
-            case 's':
-                search(m.substring(i + 1));
-                break;
+let renditions = []
+let sorting = false;
+async function sortBySize() {
+    sorting = true;
+    let tabCount = 0;
+    browser.tabs.query({}).then((tabs) => {
+        tabCount = tabs.length;
+    });
+    getAllTabs().then((tabs) => {
+        tabs.forEach((tab) => {
+            injectJS(tab, "getArtistRenditions.js");
+        });
+    });
 
-            case 'o':
-                workOnTabs();
-                break;
+    setTimeout(() => {
+        const sortedTabs = renditions.sort((a, b) => { return b.count - a.count });
+        const tabIds = sortedTabs.map((tabWithCount) => parseInt(tabWithCount.tabId));
 
-            case 'd':
-                downloadAll();
-                break;
-
-            case 'l':
-                injectCurrJS("openAll.js");
-                break;
-
-            case 'y':
-                reloadErrors();
-                break;
-
-            case 'u':
-                removeDuplicates();
-                break;
-
-            case 'c':
-                openArtistOnAllBoards();
-                break;
+        for (const tabId of tabIds) {
+            console.log(tabCount);
+            console.log("Moving tab", tabId, "to index", tabCount - tabIds.indexOf(tabId) - 1);
+            browser.tabs.move(tabId, { index: tabCount });
         }
+    }, 300);
+}
+
+
+browser.runtime.onMessage.addListener((m, sender) => {
+    if (m.type == "action" && m.text != null) {
+        let processed = ''
+        for (let i = 0; i < m.text.length; i += 1) {
+            if (processed.includes(m.text[i]))
+                continue;
+            processed += m.text[i];
+            switch (m.text[i]) {
+                case 's':
+                    search(m.text.substring(i + 1));
+                    break;
+
+                case 'o':
+                    workOnTabs();
+                    break;
+
+                case 'd':
+                    downloadAll();
+                    break;
+
+                case 'l':
+                    injectCurrJS("openAll.js");
+                    break;
+
+                case 'y':
+                    reloadErrors();
+                    break;
+
+                case 'u':
+                    removeDuplicates();
+                    break;
+
+                case 'c':
+                    openArtistOnAllBoards();
+                    break;
+
+                case 'k':
+                    sortBySize();
+                    break;
+            }
+        }
+    }
+
+    if (m.type == "renditions" && m.count != null) {
+        const tabId = sender.tab.id;
+        const count = m.count;
+        renditions.push({ tabId: tabId, count: count });
     }
 });
 

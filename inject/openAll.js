@@ -1,7 +1,8 @@
 function openSlowly(imageLinks) {
     var i = 0;
     var interval = window.setInterval((imageLinks) => {
-        window.open(imageLinks[imageLinks.length - 1 - i], "_blank")
+        var win = window.open(imageLinks[imageLinks.length - 1 - i]) //, "_blank");
+        win.blur();
         window.focus();
         if (++i >= imageLinks.length) {
             window.clearInterval(interval);

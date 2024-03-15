@@ -1,4 +1,4 @@
-function main() { 
+function main() {
     let def = 'o';
 
     let url = window.location.href;
@@ -43,8 +43,9 @@ o - open correct things in correct tabs\n\
 l - open and prepare all images on this tab\n\
 y - reload all errors\n\
 u - remove duplicate tabs\n\
-c - open artist on all boards\n", def);
-    browser.runtime.sendMessage(text);
+c - open artist on all boards\n\
+k - sort tabs by number of artist renditions", def);
+    browser.runtime.sendMessage({ type: "action", text: text });
 }
 
 main();
